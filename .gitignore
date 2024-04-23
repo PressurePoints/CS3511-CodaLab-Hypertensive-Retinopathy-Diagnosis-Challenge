@@ -718,5 +718,6 @@ data-raw/2-Groundtruths/HRDC Hypertensive Retinopathy Classification Training La
 reference/2-Hypertensive Retinopathy Classification.zip
 reference/flower_photos.tgz
 reference/work.7z
-runs/Apr23_12-44-23_LAPTOP-VOLQGMBC/events.out.tfevents.1713847463.LAPTOP-VOLQGMBC.20316.0
-runs/Apr23_12-59-22_LAPTOP-VOLQGMBC/events.out.tfevents.1713848362.LAPTOP-VOLQGMBC.19528.0
+runs/
+weights/
+train-results/
