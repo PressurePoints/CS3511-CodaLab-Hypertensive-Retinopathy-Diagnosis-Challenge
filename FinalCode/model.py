@@ -1,5 +1,5 @@
 import os
-# import cv2
+import cv2
 import torch
 import torchvision.models as models
 
@@ -12,6 +12,8 @@ import torch.nn as nn
 import torch
 from torch import Tensor
 
+from PIL import Image
+import numpy as np
 def drop_path(x, drop_prob: float = 0., training: bool = False):
     """
     Drop paths (Stochastic Depth) per sample (when applied in main path of residual blocks).
@@ -419,7 +421,13 @@ class model:
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-        # input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
+        # 将 BGR 图像转换为 RGB 图像
+        input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
+
+        # 将 numpy 数组转换为 PIL 图像
+        input_image = Image.fromarray(input_image)
+        # 将 numpy.ndarray 对象转换为 PIL 图像对象
+        # input_image = Image.fromarray((input_image * 255).astype(np.uint8))
 
         image = data_transform(input_image)
         image = torch.unsqueeze(image, dim=0)
