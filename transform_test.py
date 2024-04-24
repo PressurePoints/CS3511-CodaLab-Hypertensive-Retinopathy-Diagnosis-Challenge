@@ -36,8 +36,8 @@ def test_image_transform(image_path):
     imageInv = clahe.apply(imageInv2)
 
     # 中值滤波器去除噪声
-    imageMed = cv2.medianBlur(imageInv, 5)
-    # imageMed = imageInv
+    # imageMed = cv2.medianBlur(imageInv, 5)
+    imageMed = imageInv
 
     # 顶帽操作去除背景
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
