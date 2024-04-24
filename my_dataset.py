@@ -1,7 +1,23 @@
 from PIL import Image
 import torch
 from torch.utils.data import Dataset
+import cv2
 
+class CLAHE:
+    def __init__(self, clip_limit=2.0, tile_grid_size=(8,8)):
+        self.clip_limit = clip_limit
+        self.tile_grid_size = tile_grid_size
+
+    def __call__(self, img):
+        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+
+        # apply CLAHE to the Y channel
+        clahe = cv2.createCLAHE(clipLimit=self.clip_limit, tileGridSize=self.tile_grid_size)
+        img_yuv[:,:,0] = clahe.apply(img_yuv[:,:,0])
+
+        # convert the YUV image back to RGB format
+        img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+        return img_output
 
 class MyDataSet(Dataset):
     """自定义数据集"""
@@ -15,16 +31,31 @@ class MyDataSet(Dataset):
         return len(self.images_path)
 
     def __getitem__(self, item):
-        img = Image.open(self.images_path[item])
-        # RGB为彩色图片，L为灰度图片
-        if img.mode != 'RGB':
-            raise ValueError("image: {} isn't RGB mode.".format(self.images_path[item]))
+        # Load the image
+        img = cv2.imread(self.images_path[item])
+
+        # Apply the CLAHE transformation
+        clahe_transform = CLAHE()
+        img_clahe = clahe_transform(img)
+
+        # Convert the images to RGB format
+        img_clahe_rgb = cv2.cvtColor(img_clahe, cv2.COLOR_BGR2RGB)
+
+        # 将 numpy 数组转换为 PIL 图像
+        final_img = Image.fromarray(img_clahe_rgb)
+
+        # img = Image.open(self.images_path[item])
+        # # RGB为彩色图片，L为灰度图片
+        # if img.mode != 'RGB':
+        #     raise ValueError("image: {} isn't RGB mode.".format(self.images_path[item]))
+        
+
         label = self.images_class[item]
 
         if self.transform is not None:
-            img = self.transform(img)
+            final_img = self.transform(final_img)
 
-        return img, label
+        return final_img, label
 
     @staticmethod
     def collate_fn(batch):

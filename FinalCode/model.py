@@ -384,6 +384,23 @@ def efficientnetv2_l(num_classes: int = 1000):
     return model
 
 
+class CLAHE:
+    def __init__(self, clip_limit=2.0, tile_grid_size=(8,8)):
+        self.clip_limit = clip_limit
+        self.tile_grid_size = tile_grid_size
+
+    def __call__(self, img):
+        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+
+        # apply CLAHE to the Y channel
+        clahe = cv2.createCLAHE(clipLimit=self.clip_limit, tileGridSize=self.tile_grid_size)
+        img_yuv[:,:,0] = clahe.apply(img_yuv[:,:,0])
+
+        # convert the YUV image back to RGB format
+        img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+        return img_output
+
+
 
 class model:
     def __init__(self):
@@ -420,6 +437,10 @@ class model:
             transforms.CenterCrop(384),
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+
+        # Apply the CLAHE transformation
+        clahe_transform = CLAHE()
+        input_image = clahe_transform(input_image)
 
         # 将 BGR 图像转换为 RGB 图像
         input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
