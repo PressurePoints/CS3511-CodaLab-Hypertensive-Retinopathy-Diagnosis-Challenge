@@ -21,16 +21,32 @@ class CLAHE:
         return img_output
 
 def test_image_transform(image_path):
-    # Load the image
-    img = cv2.imread(image_path)
+    # 读取一张图片
+    image = cv2.imread(image_path)
 
-    # Apply the CLAHE transformation
-    clahe_transform = CLAHE()
-    img_clahe = clahe_transform(img)
+    # 取绿色通道
+    r, imageGreen, b = cv2.split(image)
+
+    # 对绿色通道进行对比度有限的自适应直方图均衡化
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    imageEqualized = clahe.apply(imageGreen)
+
+    # 反转处理
+    imageInv2 = 255 - imageEqualized
+    imageInv = clahe.apply(imageInv2)
+
+    # 中值滤波器去除噪声
+    imageMed = cv2.medianBlur(imageInv, 5)
+    # imageMed = imageInv
+
+    # 顶帽操作去除背景
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
+    imageBackElm = imageMed - imageOpen
 
     # Convert the images to RGB format for displaying
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img_clahe_rgb = cv2.cvtColor(img_clahe, cv2.COLOR_BGR2RGB)
+    img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    img_clahe_rgb = cv2.cvtColor(imageBackElm, cv2.COLOR_GRAY2RGB)
 
     # Display the original and transformed images
     plt.figure(figsize=(10, 5))

@@ -438,19 +438,33 @@ class model:
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
-        # Apply the CLAHE transformation
-        clahe_transform = CLAHE()
-        input_image = clahe_transform(input_image)
+        # 取绿色通道
+        r, imageGreen, b = cv2.split(input_image)
 
-        # 将 BGR 图像转换为 RGB 图像
-        input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
+        # 对绿色通道进行对比度有限的自适应直方图均衡化
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        imageEqualized = clahe.apply(imageGreen)
 
+        # 反转处理
+        imageInv2 = 255 - imageEqualized
+        imageInv = clahe.apply(imageInv2)
+
+        # 中值滤波器去除噪声
+        imageMed = cv2.medianBlur(imageInv, 5)
+        # imageMed = imageInv
+
+        # 顶帽操作去除背景
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
+        imageBackElm = imageMed - imageOpen
+
+        # Convert the images to RGB format
+        img_clahe_rgb = cv2.cvtColor(imageBackElm, cv2.COLOR_GRAY2RGB)
+        
         # 将 numpy 数组转换为 PIL 图像
-        input_image = Image.fromarray(input_image)
-        # 将 numpy.ndarray 对象转换为 PIL 图像对象
-        # input_image = Image.fromarray((input_image * 255).astype(np.uint8))
+        image = Image.fromarray(img_clahe_rgb)
 
-        image = data_transform(input_image)
+        image = data_transform(image)
         image = torch.unsqueeze(image, dim=0)
         image = image.to(self.device, torch.float)
 

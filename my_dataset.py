@@ -34,12 +34,28 @@ class MyDataSet(Dataset):
         # Load the image
         img = cv2.imread(self.images_path[item])
 
-        # Apply the CLAHE transformation
-        clahe_transform = CLAHE()
-        img_clahe = clahe_transform(img)
+        # 取绿色通道
+        r, imageGreen, b = cv2.split(img)
+
+        # 对绿色通道进行对比度有限的自适应直方图均衡化
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        imageEqualized = clahe.apply(imageGreen)
+
+        # 反转处理
+        imageInv2 = 255 - imageEqualized
+        imageInv = clahe.apply(imageInv2)
+
+        # 中值滤波器去除噪声
+        imageMed = cv2.medianBlur(imageInv, 5)
+        # imageMed = imageInv
+
+        # 顶帽操作去除背景
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
+        imageBackElm = imageMed - imageOpen
 
         # Convert the images to RGB format
-        img_clahe_rgb = cv2.cvtColor(img_clahe, cv2.COLOR_BGR2RGB)
+        img_clahe_rgb = cv2.cvtColor(imageBackElm, cv2.COLOR_GRAY2RGB)
 
         # 将 numpy 数组转换为 PIL 图像
         final_img = Image.fromarray(img_clahe_rgb)
