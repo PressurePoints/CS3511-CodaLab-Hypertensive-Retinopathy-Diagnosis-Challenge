@@ -10,7 +10,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import pandas as pd
-
+import numpy as np
 
 def load_data(data_dir):
     # 获取图片文件夹和标签文件的路径
@@ -145,21 +145,21 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch):
 
     sample_num = 0
     data_loader = tqdm(data_loader, file=sys.stdout)
-    for step, data in enumerate(data_loader):
-        images, labels = data
-        sample_num += images.shape[0]
+    for batch_idx, (data, target) in enumerate(data_loader):
+        data, target = data.to(device), target.to(device)
+        #Use Cutmix
+        data, target_a, target_b, lam = cutmix(data, target, alpha = 1.0)
+        output = model(data)
+        loss = loss_function(output, target_a) * lam + loss_function(output, target_b) * (1. - lam)
 
-        pred = model(images.to(device))
-        pred_classes = torch.max(pred, dim=1)[1]
-        accu_num += torch.eq(pred_classes, labels.to(device)).sum()
 
-        loss = loss_function(pred, labels.to(device))
+
         loss.backward()
         accu_loss += loss.detach()
 
-        data_loader.desc = "[train epoch {}] loss: {:.3f}, acc: {:.3f}".format(epoch,
-                                                                               accu_loss.item() / (step + 1),
-                                                                               accu_num.item() / sample_num)
+        # data_loader.desc = "[train epoch {}] loss: {:.3f}, acc: {:.3f}".format(epoch,
+        #                                                                        accu_loss.item() / (batch_idx + 1),
+        #                                                                        accu_num.item() / sample_num)
 
         if not torch.isfinite(loss):
             print('WARNING: non-finite loss, ending training ', loss)
@@ -168,7 +168,7 @@ def train_one_epoch(model, optimizer, data_loader, device, epoch):
         optimizer.step()
         optimizer.zero_grad()
 
-    return accu_loss.item() / (step + 1), accu_num.item() / sample_num
+    # return accu_loss.item() / (step + 1), accu_num.item() / sample_num
 
 
 @torch.no_grad()
@@ -198,3 +198,51 @@ def evaluate(model, data_loader, device, epoch):
                                                                                accu_num.item() / sample_num)
 
     return accu_loss.item() / (step + 1), accu_num.item() / sample_num
+
+def cutmix(data, target, alpha):
+    """
+    CutMix augmentation implementation.
+    参数:
+        data: batch of input images, shape (N, C, H, W)
+        target: batch of target vectors, shape (N,)
+        alpha: hyperparameter controlling the strength of CutMix regularization
+    Returns:
+        data: batch of mixed images, shape (N, C, H, W)
+        target_a: batch of target vectors type A, shape (N,)
+        target_b: batch of target vectors type B, shape (N,)
+        lam: Mixing ratio of types A and B
+    """
+    indices = torch.randperm(data.size(0))
+    shuffled_data = data[indices]
+    shuffled_target = target[indices]
+
+    lam = np.random.beta(alpha, alpha)
+    lam = max(lam, 1 - lam)
+
+    bbx1, bby1, bbx2, bby2 = rand_bbox(data.size(), lam)
+    data[:, :, bbx1:bbx2, bby1:bby2] = shuffled_data[:, :, bbx1:bbx2, bby1:bby2]
+    # Adjust lambda to exactly match pixel ratio
+    lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (data.size()[-1] * data.size()[-2]))
+
+    # Compute output
+    target_a = target
+    target_b = shuffled_target
+    return data, target_a, target_b, lam
+
+def rand_bbox(size, lam):
+    W = size[2]
+    H = size[3]
+    cut_rat = np.sqrt(1. - lam)
+    cut_w = int(W * cut_rat)
+    cut_h = int(H * cut_rat)
+
+    # uniform
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    return bbx1, bby1, bbx2, bby2
