@@ -35,18 +35,18 @@ def test_image_transform(image_path):
     imageInv2 = 255 - imageEqualized
     imageInv = clahe.apply(imageInv2)
 
-    # 中值滤波器去除噪声
-    # imageMed = cv2.medianBlur(imageInv, 5)
-    imageMed = imageInv
+    # # 中值滤波器去除噪声
+    # # imageMed = cv2.medianBlur(imageInv, 5)
+    # imageMed = imageInv
 
-    # 顶帽操作去除背景
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
-    imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
-    imageBackElm = imageMed - imageOpen
+    # # 顶帽操作去除背景
+    # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+    # imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
+    # imageBackElm = imageMed - imageOpen
 
     # Convert the images to RGB format for displaying
     img_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    img_clahe_rgb = cv2.cvtColor(imageBackElm, cv2.COLOR_GRAY2RGB)
+    img_clahe_rgb = cv2.cvtColor(imageInv, cv2.COLOR_GRAY2RGB)
 
     # Display the original and transformed images
     plt.figure(figsize=(10, 5))

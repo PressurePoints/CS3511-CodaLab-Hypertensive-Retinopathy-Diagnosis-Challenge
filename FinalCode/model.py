@@ -449,17 +449,17 @@ class model:
         imageInv2 = 255 - imageEqualized
         imageInv = clahe.apply(imageInv2)
 
-        # 中值滤波器去除噪声
-        # imageMed = cv2.medianBlur(imageInv, 5)
-        imageMed = imageInv
+        # # 中值滤波器去除噪声
+        # # imageMed = cv2.medianBlur(imageInv, 5)
+        # imageMed = imageInv
 
-        # 顶帽操作去除背景
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
-        imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
-        imageBackElm = imageMed - imageOpen
+        # # 顶帽操作去除背景
+        # kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+        # imageOpen = cv2.morphologyEx(imageMed, cv2.MORPH_OPEN, kernel)
+        # imageBackElm = imageMed - imageOpen
 
         # Convert the images to RGB format
-        img_clahe_rgb = cv2.cvtColor(imageBackElm, cv2.COLOR_GRAY2RGB)
+        img_clahe_rgb = cv2.cvtColor(imageInv, cv2.COLOR_GRAY2RGB)
         
         # 将 numpy 数组转换为 PIL 图像
         image = Image.fromarray(img_clahe_rgb)
