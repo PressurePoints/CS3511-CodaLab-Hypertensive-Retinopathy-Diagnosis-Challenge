@@ -18,8 +18,10 @@
 - `utils.py`文件：存放了一些工具函数。
 
 注1：EfficientNetV2模型的参考代码来源于[Github仓库：deep-learning-for-image-processing](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/Test11_efficientnetV2)
+
 注2：本仓库未提供python环境，需自行配置。
-**注3：**由于`Submit History`文件夹，`train-results`文件夹，`data-raw.zip`文件过大，故未上传至仓库，如需查看请联系我们。
+
+注3：由于`Submit History`文件夹，`train-results`文件夹，`data-raw.zip`文件过大，故未上传至仓库，如需查看请联系我们。
 
 # 使用说明
 解压数据集，运行`train.py`文件即可训练模型。训练完成后，`weights`文件夹将输出训练时的模型参数文件迭代。
