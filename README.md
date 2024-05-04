@@ -1,12 +1,25 @@
-## 代码使用简介
+# 项目简介
+本项目为上海交通大学 CS3511 课程 CodaLab Hypertensive-Retinopathy-Diagnosis-Challenge 的代码仓库。其中，主分支main为最后提交的代码版本迭代过程，SimpleCNN为使用简单CNN模型的代码版本，另外两个分支为使用EfficientNetV2过程中使用其他预处理方法的代码版本。具体可看报告。
 
-1. 下载好数据集，代码中默认使用的是花分类数据集，下载地址: [https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz](https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz),
-如果下载不了的话可以通过百度云链接下载: https://pan.baidu.com/s/1QLCTA4sXnQAw_yvxPj9szg 提取码:58p0
-2. 在`train.py`脚本中将`--data-path`设置成解压后的`flower_photos`文件夹绝对路径
-3. 下载预训练权重，根据自己使用的模型下载对应预训练权重: https://pan.baidu.com/s/1uZX36rvrfEss-JGj4yfzbQ  密码: 5gu1
-4. 在`train.py`脚本中将`--weights`参数设成下载好的预训练权重路径
-5. 设置好数据集的路径`--data-path`以及预训练权重的路径`--weights`就能使用`train.py`脚本开始训练了(训练过程中会自动生成`class_indices.json`文件)
-6. 在`predict.py`脚本中导入和训练脚本中同样的模型，并将`model_weight_path`设置成训练好的模型权重路径(默认保存在weights文件夹下)
-7. 在`predict.py`脚本中将`img_path`设置成你自己需要预测的图片绝对路径
-8. 设置好权重路径`model_weight_path`和预测的图片路径`img_path`就能使用`predict.py`脚本进行预测了
-9. 如果要使用自己的数据集，请按照花分类数据集的文件结构进行摆放(即一个类别对应一个文件夹)，并且将训练以及预测脚本中的`num_classes`设置成你自己数据的类别数
+# 项目结构
+- `FinalCode`文件夹：存放了最终提交网站所需的文件。
+- `Report`文件夹：存放了报告pdf和其LaTeX源码。
+- `Sample`文件夹：存放了网站提供的样例代码。
+- `Submit History`文件夹：存放了使用EfficientNetV2过程中所有版本的最终提交文件。
+- `train-results`文件夹：存放了使用EfficientNetV2过程中所有版本的训练结果（包含训练结果输出和训练出来的模型参数）。
+- `weights`文件夹：输出训练时的模型参数文件迭代。
+- `data-raw.zip`文件：存放了网站提供的原始数据集。
+- `draw-lines.py`，`transform_test.py`文件：参赛过程中使用的可视化文件。
+- `model.py`文件：存放了EfficientNetV2模型的定义。
+- `my_dataset.py`文件：存放了数据集的定义。
+- `pre_efficientnetv2-s.pth`文件：存放了EfficientNetV2模型的初始参数。
+- `predict.py`文件：存放了预测的代码，可供人工测试。
+- `train.py`文件：存放了训练的代码。
+- `utils.py`文件：存放了一些工具函数。
+
+注1：EfficientNetV2模型的参考代码来源于[Github仓库：deep-learning-for-image-processing](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/Test11_efficientnetV2)
+注2：本仓库未提供python环境，需自行配置。
+**注3：**由于`Submit History`文件夹，`train-results`文件夹，`data-raw.zip`文件过大，故未上传至仓库，如需查看请联系我们。
+
+# 使用说明
+解压数据集，运行`train.py`文件即可训练模型。训练完成后，`weights`文件夹将输出训练时的模型参数文件迭代。
